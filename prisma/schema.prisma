@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum State {
+  APPROVED
+  PENDING
+  DECLINED
+}
+
+model User {
+  id         String      @id @default(uuid())
+  email      String      @unique
+  name       String      @map("name")
+  password   String
+  state      State       @default(PENDING)
+  mailToken  MailToken?
+  avatar     String?
+
+  @@map("users")
+}
+
+model MailToken {
+  value     String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("mail_tokens")
+}
